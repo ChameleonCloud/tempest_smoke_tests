@@ -1,0 +1,82 @@
+[DEFAULT]
+log_dir = {{ tempest_workdir }}/logs
+log_file = tempest.log
+
+[oslo_concurrency]
+lock_path = {{ tempest_workdir }}/tempest_lock
+
+[auth]
+test_accounts_file = {{ tempest_workdir }}/accounts.yaml
+use_dynamic_credentials = False
+
+[identity]
+uri_v3 = {{ auth_url }}
+region = {{ region_name }}
+v3_endpoint_type = public
+
+[service_available]
+cinder = {{ cinder_enabled }}
+swift = {{ swift_enabled }}
+blazar = {{ blazar_enabled }}
+
+[validation]
+# Timeout in seconds to wait for ping to succeed. (integer value)
+ping_timeout = {{ ping_timeout }}
+# Timeout in seconds to wait for the TCP connection to be successful.
+# (integer value)
+connect_timeout = {{ connect_timeout }}
+# Timeout in seconds to wait for the ssh banner. (integer value)
+ssh_timeout = {{ ssh_timeout }}
+# User name used to authenticate to an instance. (string value)
+image_ssh_user = {{ image_ssh_user }}
+
+{% if blazar_enabled %}
+[reservation]
+# flavor to use for reservation tests. Necessarily different from `flavor_ref`, 
+# which used by tests unaware of blazar
+reservable_flavor_ref = {{ reservable_flavor_ref }}
+{% endif %}
+
+[compute]
+image_ref = {{ image_ref }}
+image_ref_alt = {{ image_ref_alt }}
+
+flavor_ref = {{ flavor_ref }}
+flavor_ref = {{ flavor_ref_alt }}
+
+# needed because baremetal nodes are slow to build
+build_timeout = {{ build_timeout }}
+
+# used for tests when new network isn't created
+fixed_network_name = {{ fixed_network_name }}
+
+
+[compute-feature-enabled]
+
+{% if baremetal_only %}
+resize = false
+pause = false
+shelve = false
+snapshot = false
+{% endif %}
+
+[network]
+public_network_id = {{ public_network_id }}
+floating_network_name = {{ floating_network_id }}
+
+[network-feature-enabled]
+
+api_extensions = {{ network_api_extensions_list }}
+
+ipv6 = {{ ipv6_enabled }}
+
+[object-storage]
+
+
+[object-storage-feature-enabled]
+{% if object_store_is_rgw %}
+container_sync = false
+{% endif %}
+
+[dashboard]
+dashboard_url = {{ horizon_dashboard_url }}
