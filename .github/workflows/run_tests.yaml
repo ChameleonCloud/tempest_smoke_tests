@@ -1,0 +1,37 @@
+name: run_tempest_ci
+on:
+  workflow_dispatch:
+    inputs:
+      site_slug:
+        type: choice
+        options: 
+          - uc_dev
+          - uc_prod
+          - kvm_prod
+
+jobs:
+  run_smoke_tests:
+    name: Run smoke tests against site
+    runs-on: ubuntu-latest   
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.13' 
+        cache: 'pip' 
+    - name: Install Deps
+      run: |
+        pip install \
+          -r requirements.txt
+    - name: template accounts file
+      shell: bash
+      env:
+        ACCOUNTS_FILE: "${{ secrets[format('{0}_accounts', inputs.site_slug)]}}"
+      run: |
+        echo "${ACCOUNTS_FILE}" \
+        | yq -P -oyaml '.' \
+        > "reference_configs/${{inputs.site_slug}}/accounts.yaml"
+    - name: Run tests
+      run: |
+        python3 run_tempest.py \
+          --site "${{inputs.site_slug}}"
