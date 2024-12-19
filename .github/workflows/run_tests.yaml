@@ -11,7 +11,7 @@ on:
 
 jobs:
   run_smoke_tests:
-    name: Run smoke tests against site
+    name: Run smoke tests against ${{inputs.site_slug}}
     runs-on: ubuntu-latest   
     steps:
     - uses: actions/checkout@v4
