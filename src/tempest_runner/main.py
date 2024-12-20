@@ -27,7 +27,8 @@ def main():
                 workspace_src_config=src_configs_dir.joinpath(name).as_posix(),
             )
         except OSError as exc:
-            LOG.warning("workspace already exists, got error %s", exc)
+            # LOG.warning("workspace already exists, got error %s", exc)
+            pass
 
 
 if __name__ == "__main__":

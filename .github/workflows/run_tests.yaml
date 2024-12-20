@@ -11,7 +11,7 @@ on:
 
 jobs:
   run_smoke_tests:
-    name: Run smoke tests against ${{inputs.site_slug}}
+    name: Run smoke tests
     runs-on: ubuntu-latest   
     steps:
     - uses: actions/checkout@v4
@@ -19,10 +19,8 @@ jobs:
       with:
         python-version: '3.13' 
         cache: 'pip' 
-    - name: Install Deps
-      run: |
-        pip install \
-          -r requirements.txt
+    - name: Install tool
+      run: pip install .
     - name: template accounts file
       shell: bash
       env:
@@ -31,7 +29,21 @@ jobs:
         echo "${ACCOUNTS_FILE}" \
         | yq -P -oyaml '.' \
         > "reference_configs/${{inputs.site_slug}}/accounts.yaml"
-    - name: Run tests
+    - name: Setup workspaces
+      run: python3 src/tempest_runner/main.py
+    - name: Run tests in a workspace
+      working-directory: workspaces/${{inputs.site_slug}}/
+      run: tempest run --smoke
+    - name: Generate CTRF json from stestr result
+      shell: bash
       run: |
-        python3 run_tempest.py \
-          --site "${{inputs.site_slug}}"
+        python3 \
+        src/tempest_runner/parse_results.py \
+        "workspaces/${{inputs.site_slug}}/"
+    - name: Upload test results
+      uses: actions/upload-artifact@v4
+      with:
+        name: ctrf-report
+        path: /tmp/ctrf-report.json
+    - name: Publish CTRF Test Summary Results
+      run: npx github-actions-ctrf /tmp/ctrf-report.json
