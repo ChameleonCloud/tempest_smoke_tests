@@ -1,4 +1,5 @@
 import logging
+import os
 from pathlib import Path
 
 from tempest_runner.setup_workspace import TempestManager
@@ -8,10 +9,12 @@ LOG = logging.getLogger(__name__)
 
 
 def main():
-    workspaces_dir = Path("/home/cc/tempest_smoke_tests/workspaces/")
-    workspaces_yaml = workspaces_dir.joinpath("workspaces.yaml")
+    project_base = os.environ.get("GITHUB_WORKSPACE", ".")
 
-    src_configs_dir = Path("/home/cc/tempest_smoke_tests/reference_configs/")
+    project_base_path = Path(project_base)
+    workspaces_dir = project_base_path.joinpath("workspaces")
+    workspaces_yaml = workspaces_dir.joinpath("workspaces.yaml")
+    src_configs_dir = project_base_path.joinpath("reference_configs")
 
     manager = TempestManager(
         workspaces_config_path=workspaces_yaml.as_posix(),

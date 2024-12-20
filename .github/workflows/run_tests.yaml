@@ -3,6 +3,7 @@ on:
   workflow_dispatch:
     inputs:
       site_slug:
+        required: true
         type: choice
         options: 
           - uc_dev
@@ -34,6 +35,7 @@ jobs:
     - name: Run tests in a workspace
       working-directory: workspaces/${{inputs.site_slug}}/
       run: tempest run --smoke
+      continue-on-error: true
     - name: Generate CTRF json from stestr result
       shell: bash
       run: |
