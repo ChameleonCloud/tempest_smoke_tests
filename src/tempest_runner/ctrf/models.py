@@ -9,6 +9,7 @@ from pydantic import BaseModel, ValidationError, field_validator
 from testtools import TestByTestResult
 from testtools.content import Content
 from testtools.testcase import TestCase
+from testtools.testresult.real import _details_to_str
 
 
 class StatusEnum(str, Enum):
@@ -109,7 +110,7 @@ class CTRFOutputResult(TestByTestResult):
         start_time: datetime,
         stop_time: datetime,
         tags: List[str],
-        details: dict,
+        details: dict[str, Content],
     ):
         """
         A callable that take a test case, a status (one of
@@ -127,12 +128,18 @@ class CTRFOutputResult(TestByTestResult):
         else:
             duration_ms = 0
 
-        reason: Content | None = details.get("reason")
-        reason_msg = None
-        if reason:
-            reason_msg = reason.as_text()
+        kwargs = {}
+        reason_content = details.pop("reason", None)
+        if reason_content:
+            kwargs["message"] = reason_content.as_text().strip()
 
-        reason_msg = self.content_as_text(details.get("reason"))
+        traceback_content = details.pop("traceback", None)
+        if traceback_content:
+            kwargs["trace"] = traceback_content.as_text().strip()
+
+        # extra_kwargs = {}
+        # for key, value in details.items():
+        #     extra_kwargs[key] = value.as_text().strip()
 
         ctrfTest = Test(
             name=test.id(),
@@ -141,8 +148,7 @@ class CTRFOutputResult(TestByTestResult):
             stop=int(stop_time.timestamp()),
             duration=int(duration_ms),
             tags=tags,
-            message=reason_msg,
-            # trace=details.get("traceback"),
+            **kwargs,
         )
         self.ctrf_results.tests.append(ctrfTest)
 
