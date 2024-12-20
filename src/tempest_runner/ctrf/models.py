@@ -2,17 +2,26 @@
 
 import json
 from datetime import datetime, timedelta
+from enum import Enum
 from typing import Iterable, List, Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ValidationError, field_validator
 from testtools import TestByTestResult
 from testtools.content import Content
 from testtools.testcase import TestCase
 
 
+class StatusEnum(str, Enum):
+    passed = "passed"
+    failed = "failed"
+    skipped = "skipped"
+    pending = "pending"
+    other = "other"
+
+
 class Test(BaseModel):
     name: str
-    status: str
+    status: StatusEnum
     duration: int
     start: Optional[int] = None
     stop: Optional[int] = None
@@ -71,18 +80,22 @@ class CTRFOutputResult(TestByTestResult):
 
     def addSuccess(self, test, details=None):
         super().addSuccess(test, details)
+        self._status = "passed"
         self.ctrf_results.summary.passed += 1
 
     def addFailure(self, test, err=None, details=None):
         super().addFailure(test, err, details)
+        self._status = "failed"
         self.ctrf_results.summary.failed += 1
 
     def addError(self, test, err=None, details=None):
         super().addError(test, err, details)
+        self._status = "failed"
         self.ctrf_results.summary.failed += 1
 
     def addSkip(self, test, reason=None, details=None):
         super().addSkip(test, reason, details)
+        self._status = "skipped"
         self.ctrf_results.summary.skipped += 1
 
     def content_as_text(self, item: Content | None) -> str | None:
