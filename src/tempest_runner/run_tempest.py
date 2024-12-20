@@ -22,12 +22,15 @@ class TestArgs(object):
     parallel: bool = True
     subunit: bool = False
 
+    regex: str
+
+    exclude_list: str
+
     worker_file = None
     state = None
     black_regex = None
     exclude_regex = None
     blacklist_file = None
-    exclude_list = None
     whitelist_file = None
     include_list = None
 
@@ -79,15 +82,34 @@ class TempestManager:
     def run_tests(self, workspace_name, **kwargs):
         """Run tempest command in workspace"""
 
-        ta = TestArgs()
-        ta.workspace_path = self.workspaces_yaml_path
-        ta.workspace = workspace_name
-        ta.concurrency = 2
-        ta.smoke = True
-        ta.list_tests = False
+        # ta = TestArgs()
 
-        ta.exclude_list = os.path.join(self.test_lists_base, "exclude_list")
+        ta = argparse.Namespace(
+            workspace=workspace_name,
+            workspace_path=self.workspaces_yaml_path,
+            exclude_list=os.path.join(self.test_lists_base, "exclude_list"),
+            config_file=None,
+            state=None,
+            black_regex=None,
+            exclude_regex=None,
+            blacklist_file=None,
+            whitelist_file=None,
+            include_list=None,
+            parallel=True,
+            subunit=False,
+            worker_file=None,
+            load_list=None,
+            combine=None,
+            **kwargs,
+        )
 
+        # ta.workspace_path = self.workspaces_yaml_path
+        # ta.workspace = workspace_name
+
+        # ta.upda
+        # ta.exclude_list = os.path.join(self.test_lists_base, "exclude_list")
+
+        # LOG.info("invoking tempest with args %s", ta.__dict__)
         self.test_runner.take_action(ta)
 
 
@@ -95,15 +117,24 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
 
     parser.add_argument("--site", type=str)
+    parser.add_argument("--list_tests", action="store_true")
+
+    parser.add_argument("--concurrency", type=int, default=1)
+
+    target_group = parser.add_mutually_exclusive_group()
+    target_group.add_argument("--smoke", action="store_true")
+    target_group.add_argument("--regex", type=str)
 
     parsed_args = parser.parse_args()
     return parsed_args
 
 
 def main():
-    args = parse_args()
+    parsed_args = parse_args()
 
-    site = args.site
+    args_dict = vars(parsed_args)
+
+    site = args_dict.pop("site")
     if not site:
         exit(1)
 
@@ -120,7 +151,7 @@ def main():
         )
 
         tempest_mgr.register_workspace(site)
-        tempest_mgr.run_tests(site)
+        tempest_mgr.run_tests(site, **args_dict)
 
 
 if __name__ == "__main__":
