@@ -40,15 +40,15 @@ class Test(BaseModel):
 
 
 class Summary(BaseModel):
-    tests: int = 0
-    passed: int = 0
-    failed: int = 0
-    pending: int = 0
-    skipped: int = 0
-    other: int = 0
+    tests: int
+    passed: int
+    failed: int
+    pending: int
+    skipped: int
+    other: int
     suites: Optional[int] = None
-    start: int = 0
-    stop: int = 0
+    start: Optional[int] = None
+    stop: Optional[int] = None
     extra: Optional[object] = None
 
 
@@ -58,23 +58,37 @@ class Tool(BaseModel):
     extra: Optional[object] = None
 
 
+class Environment(BaseModel):
+    reportName: Optional[str] = None
+    buildName: Optional[str] = None
+    buildNumber: Optional[str] = None
+    buildUrl: Optional[str] = None
+
+
 class Results(BaseModel):
     tool: Tool
     summary: Summary
     tests: List[Test]
+    environment: Environment
 
 
 class CTRFOutputResult(TestByTestResult):
-    def __init__(self, stream):
+    def __init__(self, stream, result_env: dict):
         super().__init__(self._on_test)
         self._write_row = lambda obj: stream.write(obj)
 
-        ctrf_summary = Summary()
+        ctrf_summary = Summary(
+            tests=0,
+            passed=0,
+            failed=0,
+            skipped=0,
+            pending=0,
+            other=0,
+        )
+        ctrf_environment = Environment(**result_env)
         ctrf_tool = Tool(name="tempest")
         ctrf_results = Results(
-            tool=ctrf_tool,
-            summary=ctrf_summary,
-            tests=[],
+            tool=ctrf_tool, summary=ctrf_summary, tests=[], environment=ctrf_environment
         )
 
         self.ctrf_results = ctrf_results
@@ -103,6 +117,19 @@ class CTRFOutputResult(TestByTestResult):
         if isinstance(item, Content):
             return item.as_text()
 
+    def _update_summary_times(self, start: int, stop: int):
+        # ensure start and stop times are initialized
+        if self.ctrf_results.summary.start is None:
+            self.ctrf_results.summary.start = start
+        if self.ctrf_results.summary.stop is None:
+            self.ctrf_results.summary.stop = stop
+
+        # set to earliest
+        self.ctrf_results.summary.start = min(start, self.ctrf_results.summary.start)
+
+        # set to latest
+        self.ctrf_results.summary.stop = max(stop, self.ctrf_results.summary.stop)
+
     def _on_test(
         self,
         test: TestCase,
@@ -122,9 +149,14 @@ class CTRFOutputResult(TestByTestResult):
         self.ctrf_results.summary.tests += 1
 
         if start_time and stop_time:
-            duration_timedelta = stop_time - start_time
-            # convert to units of milliseconds
-            duration_ms = duration_timedelta / timedelta(milliseconds=1)
+            # convert to integer millisecond count
+            start_time_ms = int(start_time.timestamp() * 1000)
+            stop_time_ms = int(stop_time.timestamp() * 1000)
+
+            # update summary times
+            self._update_summary_times(start=start_time_ms, stop=stop_time_ms)
+
+            duration_ms = stop_time_ms - start_time_ms
         else:
             duration_ms = 0
 
@@ -144,8 +176,8 @@ class CTRFOutputResult(TestByTestResult):
         ctrfTest = Test(
             name=test.id(),
             status=status,
-            start=int(start_time.timestamp()),
-            stop=int(stop_time.timestamp()),
+            start=int(start_time.timestamp() * 1000),
+            stop=int(stop_time.timestamp() * 1000),
             duration=int(duration_ms),
             tags=tags,
             **kwargs,
@@ -157,6 +189,6 @@ class CTRFOutputResult(TestByTestResult):
 
     def stopTestRun(self):
         super().stopTestRun()
-        result_dict = self.ctrf_results.model_dump()
+        result_dict = self.ctrf_results.model_dump(exclude_unset=True)
         output_dict = {"results": result_dict}
         self._write_row(json.dumps(output_dict, indent=2))

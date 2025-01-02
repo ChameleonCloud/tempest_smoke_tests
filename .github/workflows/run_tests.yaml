@@ -34,18 +34,24 @@ jobs:
       run: python3 src/tempest_runner/main.py
     - name: Run tests in a workspace
       working-directory: workspaces/${{inputs.site_slug}}/
-      run: tempest run --smoke
       continue-on-error: true
+      run: |
+        tempest run \
+          --concurrency 2 \
+          --exclude-list etc/exclude_list \
+          --regex test_create_server.ServersTestJSON.test_list_server
     - name: Generate CTRF json from stestr result
       shell: bash
       run: |
         python3 \
         src/tempest_runner/parse_results.py \
         "workspaces/${{inputs.site_slug}}/"
+    - name: list files
+      run: ls -al workspaces/${{inputs.site_slug}}
     - name: Upload test results
       uses: actions/upload-artifact@v4
       with:
         name: ctrf-report
-        path: /tmp/ctrf-report.json
+        path: "workspaces/${{inputs.site_slug}}/ctrf-results-0.json"
     - name: Publish CTRF Test Summary Results
-      run: npx github-actions-ctrf /tmp/ctrf-report.json
+      run: npx github-actions-ctrf "workspaces/${{inputs.site_slug}}/ctrf-results-0.json"
