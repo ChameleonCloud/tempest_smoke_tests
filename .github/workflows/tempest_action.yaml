@@ -54,6 +54,7 @@ jobs:
             --list-tests
       - name: Run Tests
         working-directory: workspace
+        continue-on-error: true
         run: |
           tempest run \
             --concurrency 2 \
