@@ -1,0 +1,79 @@
+name: Reusable workflow example
+
+on:
+  workflow_call:
+    inputs:
+      config-path:
+        required: true
+        type: string
+      name:
+        required: true
+        type: string
+    secrets:
+      accounts_gpg_passphrase:
+        required: true
+      slack_webhook_url:
+        required: false
+    
+
+jobs:
+  run_tempest:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13' 
+          cache: 'pip'
+      - name: install tempest
+        run: pip install .
+      - name: decrypt_accounts_file
+        env:
+          SECRET_PASSPHRASE: ${{secrets.accounts_gpg_passphrase}}
+        run: |
+          ./decrypt_secret.sh \
+            "${{inputs.config-path}}/accounts.yaml.gpg" \
+            "${{inputs.config-path}}/accounts.yaml"
+      - name: init workspace
+        run: |
+          tempest init \
+          --config-dir ${{inputs.config-path}} \
+          --name ${{inputs.name}} \
+          workspace
+      - name: show templated config
+        run: |
+          ls -al workspace
+          ls -al workspace/etc/
+          cat workspace/etc/tempest.conf
+      - name: List Tests that will be run
+        working-directory: workspace
+        run: |
+          tempest run \
+            --include-list etc/include_list \
+            --exclude-list etc/exclude_list \
+            --list-tests
+      - name: Run Tests
+        working-directory: workspace
+        run: |
+          tempest run \
+            --concurrency 2 \
+            --include-list etc/include_list \
+            --exclude-list etc/exclude_list
+      - name: Generate CTRF json from stestr result
+        shell: bash
+        run: python3 src/tempest_runner/parse_results.py workspace
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        with:
+          name: ctrf-report
+          path: "workspace/ctrf-results-0.json"
+      - name: Publish CTRF Test Summary Results
+        run: npx github-actions-ctrf "workspace/ctrf-results-0.json"
+      - name: Publish failures to slack
+        env:
+          SLACK_WEBHOOK_URL: ${{secrets.slack_webhook_url}}
+        run: |
+          npx slack-ctrf results \
+          --title ${{inputs.name}} \
+          "workspace/ctrf-results-0.json"
+        
