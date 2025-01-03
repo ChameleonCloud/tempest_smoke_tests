@@ -76,5 +76,6 @@ jobs:
         run: |
           npx slack-ctrf results \
           --title ${{inputs.name}} \
+          --onFailOnly \
           "workspace/ctrf-results-0.json"
         
