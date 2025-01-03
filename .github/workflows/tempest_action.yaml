@@ -19,6 +19,8 @@ on:
 jobs:
   run_tempest:
     runs-on: ubuntu-22.04
+    env:
+      artifact_name: "${{github.run_id}}-${{github.run_attempt}}-${{inputs.name}}-ctrf-report"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -64,12 +66,16 @@ jobs:
         shell: bash
         run: python3 src/tempest_runner/parse_results.py workspace
       - name: Upload test results
+        id: upload_result
         uses: actions/upload-artifact@v4
         with:
-          name: ctrf-report
+          name: ${{env.artifact_name}}
           path: "workspace/ctrf-results-0.json"
       - name: Publish CTRF Test Summary Results
-        run: npx github-actions-ctrf "workspace/ctrf-results-0.json"
+        run: |
+          npx github-actions-ctrf \
+          --artifact-name ${{env.artifact_name}} \
+          "workspace/ctrf-results-0.json"
       - name: Publish failures to slack
         env:
           SLACK_WEBHOOK_URL: ${{secrets.slack_webhook_url}}
