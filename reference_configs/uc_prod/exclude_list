@@ -3,3 +3,6 @@ tempest.scenario.test_dashboard_basic_ops.TestDashboardBasicOps.test_basic_scena
 
 # known failing for site with ONLY reservable instances
 tempest.api.compute.servers.test_create_server.ServersTestJSON
+tempest.api.compute.servers.test_server_actions.ServerActionsTestJSON
+tempest.api.compute.servers.test_server_addresses.ServerAddressesTestJSON
+tempest.api.compute.servers.test_create_server.ServersTestManualDisk
