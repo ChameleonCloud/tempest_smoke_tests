@@ -1,51 +1,27 @@
-name: run_tempest_ci
-on:
-  workflow_dispatch:
-    inputs:
-      site_slug:
-        required: true
-        type: choice
-        options: 
-          - uc_dev
-          - uc_prod
-          - kvm_prod
+name: run smoke tests
+
+on: 
+  workflow_dispatch
 
 jobs:
-  run_smoke_tests:
-    name: Run smoke tests
-    runs-on: ubuntu-latest   
-    steps:
-    - uses: actions/checkout@v4
-    - uses: actions/setup-python@v5
-      with:
-        python-version: '3.13' 
-        cache: 'pip' 
-    - name: Install tool
-      run: pip install .
-    - name: template accounts file
-      shell: bash
-      env:
-        ACCOUNTS_FILE: "${{ secrets[format('{0}_accounts', inputs.site_slug)]}}"
-      run: |
-        echo "${ACCOUNTS_FILE}" \
-        | yq -P -oyaml '.' \
-        > "reference_configs/${{inputs.site_slug}}/accounts.yaml"
-    - name: Setup workspaces
-      run: python3 src/tempest_runner/main.py
-    - name: Run tests in a workspace
-      working-directory: workspaces/${{inputs.site_slug}}/
-      run: tempest run --smoke
-      continue-on-error: true
-    - name: Generate CTRF json from stestr result
-      shell: bash
-      run: |
-        python3 \
-        src/tempest_runner/parse_results.py \
-        "workspaces/${{inputs.site_slug}}/"
-    - name: Upload test results
-      uses: actions/upload-artifact@v4
-      with:
-        name: ctrf-report
-        path: /tmp/ctrf-report.json
-    - name: Publish CTRF Test Summary Results
-      run: npx github-actions-ctrf /tmp/ctrf-report.json
+  run_tests:
+    strategy:
+      matrix:
+        include:
+          - config-path: "reference_configs/uc_dev"
+            name: "DEV@UC"
+          - config-path: "reference_configs/uc_prod"
+            name: "CHI@UC"
+          - config-path: "reference_configs/kvm_prod"
+            name: "KVM@TACC"
+    name: "smoke tests: ${{matrix.name}}"
+    concurrency:
+      group: ${{matrix.name}}
+      cancel-in-progress: false
+    uses: ./.github/workflows/tempest_action.yaml
+    with:
+      config-path: ${{matrix.config-path}}
+      name: ${{matrix.name}}
+    secrets:
+      accounts_gpg_passphrase: ${{secrets.accounts_gpg_passphrase}}
+      slack_webhook_url: ${{secrets.slack_webhook_url}}

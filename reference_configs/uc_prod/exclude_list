@@ -1,0 +1,5 @@
+# known failing due to interaction between federated auth and our horizon config
+tempest.scenario.test_dashboard_basic_ops.TestDashboardBasicOps.test_basic_scenario
+
+# known failing for site with ONLY reservable instances
+tempest.api.compute.servers.test_create_server.ServersTestJSON
