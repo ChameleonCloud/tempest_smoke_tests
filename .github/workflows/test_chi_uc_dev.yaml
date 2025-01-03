@@ -18,6 +18,7 @@ concurrency:
 
 jobs:
   run_tests:
+    name: "DEV@UC Smoke Tests"
     uses: ./.github/workflows/tempest_action.yaml
     with:
       config-path: reference_configs/uc_dev/

@@ -8,6 +8,9 @@ on:
     branches: main
     paths:
       - reference_configs/uc_prod/
+      - src
+      - .github/workflows/tempest_action.yaml
+      - .github/workflows/test_chi_uc_prod.yaml
 
 concurrency:
   group: "CHI@UC"
@@ -15,6 +18,7 @@ concurrency:
 
 jobs:
   run_tests:
+    name: "CHI@UC Smoke Tests"
     uses: ./.github/workflows/tempest_action.yaml
     with:
       config-path: reference_configs/uc_prod/

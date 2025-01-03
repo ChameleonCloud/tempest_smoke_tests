@@ -8,6 +8,9 @@ on:
     branches: main
     paths:
       - reference_configs/kvm_prod/
+      - src
+      - .github/workflows/tempest_action.yaml
+      - .github/workflows/test_kvm_tacc_prod.yaml
 
 concurrency:
   group: "KVM@TACC"
@@ -15,6 +18,7 @@ concurrency:
 
 jobs:
   run_tests:
+    name: "KVM@TACC Smoke Tests"
     uses: ./.github/workflows/tempest_action.yaml
     with:
       config-path: reference_configs/kvm_prod/
