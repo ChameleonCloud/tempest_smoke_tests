@@ -10,7 +10,10 @@ readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "tempest",
-    "pydantic"
+    "pydantic",
+    "manila-tempest-plugin",
+    "zun-tempest-plugin",
+    "blazar-tempest-plugin @ git+https://github.com/chameleoncloud/chi-blazar-tempest-plugin"
 ]
 
 [project.optional-dependencies]
