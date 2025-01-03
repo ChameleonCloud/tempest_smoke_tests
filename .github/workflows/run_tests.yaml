@@ -10,6 +10,10 @@ jobs:
         include:
           - config-path: "reference_configs/uc_dev"
             name: "DEV@UC"
+          - config-path: "reference_configs/uc_prod"
+            name: "CHI@UC"
+          - config-path: "reference_configs/kvm_prod"
+            name: "KVM@TACC"
     uses: ./.github/workflows/tempest_action.yaml
     with:
       config-path: ${{matrix.config-path}}

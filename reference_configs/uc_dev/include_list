@@ -1,2 +1,1 @@
-tempest.api.network.test_security_groups.SecGroupTest.test_list_security_groups
-# smoke
+smoke
