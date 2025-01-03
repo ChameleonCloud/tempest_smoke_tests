@@ -6,6 +6,7 @@ on:
 jobs:
   run_tests:
     strategy:
+      fail-fast: false
       matrix:
         include:
           - config-path: "reference_configs/uc_dev"
