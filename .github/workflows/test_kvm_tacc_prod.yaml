@@ -1,0 +1,24 @@
+name: run smoke tests for KVM@TACC
+
+on: 
+  workflow_dispatch:
+  schedule:
+    - cron: "30 7 * * *"
+  push:
+    branches: main
+    paths:
+      - reference_configs/kvm_prod/
+
+concurrency:
+  group: "KVM@TACC"
+  cancel-in-progress: false
+
+jobs:
+  run_tests:
+    uses: ./.github/workflows/tempest_action.yaml
+    with:
+      config-path: reference_configs/kvm_prod/
+      name: "KVM@TACC"
+    secrets:
+      accounts_gpg_passphrase: ${{secrets.accounts_gpg_passphrase}}
+      slack_webhook_url: ${{secrets.slack_webhook_url}}

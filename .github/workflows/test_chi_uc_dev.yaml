@@ -1,0 +1,27 @@
+name: run smoke tests for DEV@UC
+
+on: 
+  workflow_dispatch:
+  schedule:
+    - cron: "10 7 * * *"
+  push:
+    branches: main
+    paths:
+      - reference_configs/uc_dev/
+      - src
+      - .github/workflows/tempest_action.yaml
+      - .github/workflows/test_chi_uc_dev.yaml
+
+concurrency:
+  group: "DEV@UC"
+  cancel-in-progress: false
+
+jobs:
+  run_tests:
+    uses: ./.github/workflows/tempest_action.yaml
+    with:
+      config-path: reference_configs/uc_dev/
+      name: "DEV@UC"
+    secrets:
+      accounts_gpg_passphrase: ${{secrets.accounts_gpg_passphrase}}
+      slack_webhook_url: ${{secrets.slack_webhook_url}}
