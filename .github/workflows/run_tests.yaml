@@ -14,6 +14,10 @@ jobs:
             name: "CHI@UC"
           - config-path: "reference_configs/kvm_prod"
             name: "KVM@TACC"
+    name: "smoke tests: ${{matrix.name}}"
+    concurrency:
+      group: ${{matrix.name}}
+      cancel-in-progress: false
     uses: ./.github/workflows/tempest_action.yaml
     with:
       config-path: ${{matrix.config-path}}
