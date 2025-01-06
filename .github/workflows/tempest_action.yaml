@@ -77,6 +77,10 @@ jobs:
           historical \
           --artifact-name ${{env.artifact_name}} \
           "workspace/ctrf-results-0.json"
+        if: always()
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        
       # - name: Publish failures to slack
       #   env:
       #     SLACK_WEBHOOK_URL: ${{secrets.slack_webhook_url}}
