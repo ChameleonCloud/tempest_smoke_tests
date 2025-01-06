@@ -1,0 +1,28 @@
+name: run smoke tests for CHI@Edge
+
+on: 
+  workflow_dispatch:
+  schedule:
+    - cron: "30 7 * * *"
+  push:
+    branches: main
+    paths:
+      - reference_configs/edge_prod/
+      - src
+      - .github/workflows/tempest_action.yaml
+      - .github/workflows/test_chi_edge_prod.yaml
+
+concurrency:
+  group: "CHI@Edge"
+  cancel-in-progress: false
+
+jobs:
+  run_tests:
+    name: "CHI@Edge Smoke Tests"
+    uses: ./.github/workflows/tempest_action.yaml
+    with:
+      config-path: reference_configs/edge_prod/
+      name: "CHI@Edge"
+    secrets:
+      accounts_gpg_passphrase: ${{secrets.accounts_gpg_passphrase}}
+      slack_webhook_url: ${{secrets.slack_webhook_url}}
