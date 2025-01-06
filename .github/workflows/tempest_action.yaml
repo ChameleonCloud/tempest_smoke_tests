@@ -18,9 +18,11 @@ on:
 
 jobs:
   run_tempest:
+    name: "Tempest Tests: ${{inputs.name}}"
     runs-on: ubuntu-22.04
     env:
-      artifact_name: "${{github.run_id}}-${{github.run_attempt}}-${{inputs.name}}-ctrf-report"
+      artifact_name: "${{inputs.name}}-ctrf-report"
+    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -56,7 +58,6 @@ jobs:
             --list-tests
       - name: Run Tests
         working-directory: workspace
-        continue-on-error: true
         run: |
           tempest run \
             --concurrency 2 \
@@ -65,46 +66,31 @@ jobs:
       - name: Generate CTRF json from stestr result
         shell: bash
         run: python3 src/tempest_runner/parse_results.py workspace
+      - name: Publish CTRF Test Summary Results
+        run: npx github-actions-ctrf summary --artifact-name ${{env.artifact_name}} "workspace/ctrf-results-0.json"
+        if: always()
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Publish CTRF Failures
+        run: npx github-actions-ctrf failed --artifact-name ${{env.artifact_name}} --annotate false "workspace/ctrf-results-0.json"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        if: always()
+      - name: Publish CTRF Test History
+        run: npx github-actions-ctrf historical --artifact-name ${{env.artifact_name}} --annotate false  "workspace/ctrf-results-0.json"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        if: always()
+        
+      - name: Publish failures to slack
+        run: npx slack-ctrf failed --title ${{inputs.name}} "workspace/ctrf-results-0.json"
+        env:
+          SLACK_WEBHOOK_URL: ${{secrets.slack_webhook_url}}
+        if: always()
+
       - name: Upload test results
         id: upload_result
         uses: actions/upload-artifact@v4
         with:
           name: ${{env.artifact_name}}
           path: "workspace/ctrf-results-0.json"
-      - name: Publish CTRF Test Summary Results
-        run: |
-          npx github-actions-ctrf \
-          summary \
-          --artifact-name ${{env.artifact_name}} \
-          "workspace/ctrf-results-0.json"
-        if: always()
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Publish CTRF Failures
-        run: |
-          npx github-actions-ctrf \
-          failed \
-          --artifact-name ${{env.artifact_name}} \
-          "workspace/ctrf-results-0.json"
-        if: always()
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Publish CTRF Test History
-        run: |
-          npx github-actions-ctrf \
-          historical \
-          --artifact-name ${{env.artifact_name}} \
-          "workspace/ctrf-results-0.json"
-        if: always()
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        
-      - name: Publish failures to slack
-        env:
-          SLACK_WEBHOOK_URL: ${{secrets.slack_webhook_url}}
-        if: always()
-        run: |
-          npx slack-ctrf failed \
-          --title ${{inputs.name}} \
-          "workspace/ctrf-results-0.json"
-        
