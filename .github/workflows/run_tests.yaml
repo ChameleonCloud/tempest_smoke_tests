@@ -2,27 +2,26 @@ name: run smoke tests
 
 on: 
   workflow_dispatch:
+    inputs:
+      site_slug: 
+        type: choice
+        options:
+          - "uc_dev"
+          - "uc_prod"
+          - "kvm_prod"
+          - "tacc_prod"
+          - "edge_prod"
+        required: true
 
 jobs:
   run_tests:
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - config-path: "reference_configs/uc_dev"
-            name: "DEV@UC"
-          - config-path: "reference_configs/uc_prod"
-            name: "CHI@UC"
-          - config-path: "reference_configs/kvm_prod"
-            name: "KVM@TACC"
-    name: "smoke tests: ${{matrix.name}}"
     concurrency:
-      group: ${{matrix.name}}
+      group: "${{inputs.site_slug}}"
       cancel-in-progress: false
     uses: ./.github/workflows/tempest_action.yaml
     with:
-      config-path: ${{matrix.config-path}}
-      name: ${{matrix.name}}
+      config-path: "reference_configs/${{inputs.site_slug}}"
+      name: "${{inputs.site_slug}}"
     secrets:
       accounts_gpg_passphrase: ${{secrets.accounts_gpg_passphrase}}
       slack_webhook_url: ${{secrets.slack_webhook_url}}
