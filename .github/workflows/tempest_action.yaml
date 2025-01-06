@@ -99,12 +99,12 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         
-      # - name: Publish failures to slack
-      #   env:
-      #     SLACK_WEBHOOK_URL: ${{secrets.slack_webhook_url}}
-      #   run: |
-      #     npx slack-ctrf results \
-      #     --title ${{inputs.name}} \
-      #     --onFailOnly \
-      #     "workspace/ctrf-results-0.json"
+      - name: Publish failures to slack
+        env:
+          SLACK_WEBHOOK_URL: ${{secrets.slack_webhook_url}}
+        if: always()
+        run: |
+          npx slack-ctrf failed \
+          --title ${{inputs.name}} \
+          "workspace/ctrf-results-0.json"
         
