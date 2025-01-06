@@ -167,7 +167,10 @@ class CTRFOutputResult(TestByTestResult):
 
         traceback_content = details.pop("traceback", None)
         if traceback_content:
-            kwargs["trace"] = traceback_content.as_text().strip()
+            if reason_content:
+                kwargs["trace"] = traceback_content.as_text().strip()
+            else:
+                kwargs["message"] = traceback_content.as_text().strip()
 
         # extra_kwargs = {}
         # for key, value in details.items():
