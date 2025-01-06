@@ -22,7 +22,6 @@ jobs:
     runs-on: ubuntu-22.04
     env:
       artifact_name: "${{inputs.name}}-ctrf-report"
-    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -58,6 +57,7 @@ jobs:
             --list-tests
       - name: Run Tests
         working-directory: workspace
+        continue-on-error: true
         run: |
           tempest run \
             --concurrency 2 \
