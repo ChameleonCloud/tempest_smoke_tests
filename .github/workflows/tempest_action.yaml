@@ -74,14 +74,37 @@ jobs:
       - name: Publish CTRF Test Summary Results
         run: |
           npx github-actions-ctrf \
+          summary \
           --artifact-name ${{env.artifact_name}} \
           "workspace/ctrf-results-0.json"
+        if: always()
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Publish CTRF Failures
+        run: |
+          npx github-actions-ctrf \
+          failed \
+          --artifact-name ${{env.artifact_name}} \
+          "workspace/ctrf-results-0.json"
+        if: always()
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Publish CTRF Test History
+        run: |
+          npx github-actions-ctrf \
+          historical \
+          --artifact-name ${{env.artifact_name}} \
+          "workspace/ctrf-results-0.json"
+        if: always()
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        
       - name: Publish failures to slack
         env:
           SLACK_WEBHOOK_URL: ${{secrets.slack_webhook_url}}
+        if: always()
         run: |
-          npx slack-ctrf results \
+          npx slack-ctrf failed \
           --title ${{inputs.name}} \
-          --onFailOnly \
           "workspace/ctrf-results-0.json"
         
