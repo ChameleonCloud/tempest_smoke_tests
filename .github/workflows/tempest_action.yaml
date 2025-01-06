@@ -83,7 +83,7 @@ jobs:
       - name: Publish CTRF Failures
         run: |
           npx github-actions-ctrf \
-          summary \
+          failed \
           --artifact-name ${{env.artifact_name}} \
           "workspace/ctrf-results-0.json"
         if: always()
