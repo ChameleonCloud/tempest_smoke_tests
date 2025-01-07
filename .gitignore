@@ -174,4 +174,5 @@ cython_debug/
 **/accounts.yaml
 
 # workspaces are ephemeral
+workspace/
 workspaces/

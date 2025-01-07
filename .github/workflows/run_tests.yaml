@@ -2,26 +2,44 @@ name: run smoke tests
 
 on: 
   workflow_dispatch:
-    inputs:
-      site_slug: 
-        type: choice
-        options:
-          - "uc_dev"
-          - "uc_prod"
-          - "kvm_prod"
-          - "tacc_prod"
-          - "edge_prod"
-        required: true
 
 jobs:
-  run_tests:
+  run_tempest:
+    strategy:
+      fail-fast: false
+      matrix:
+          include:
+            - site_slug: edge_prod
+              concurrency: 2
+            - site_slug: uc_dev
+              concurrency: 2
+            - site_slug: kvm_prod
+              concurrency: 2
+            
     concurrency:
-      group: "${{inputs.site_slug}}"
+      group: "${{matrix.site_slug}}"
       cancel-in-progress: false
     uses: ./.github/workflows/tempest_action.yaml
     with:
-      config-path: "reference_configs/${{inputs.site_slug}}"
-      name: "${{inputs.site_slug}}"
+      config-path: "reference_configs/${{matrix.site_slug}}"
+      name: "${{matrix.site_slug}}"
+      tempest_args: |
+        --concurrency ${{matrix.concurrency}} \
+        --include_list etc/include_list \
+        --exclude_list etc/exclude_list
     secrets:
       accounts_gpg_passphrase: ${{secrets.accounts_gpg_passphrase}}
-      slack_webhook_url: ${{secrets.slack_webhook_url}}
+  handle_results:
+    runs-on: ubuntu-22.04
+    needs: run_tempest
+    steps:
+      - name: download subunit results
+        id: subunit_artifact
+        uses: actions/download-artifact@v4
+        with:
+          pattern: '*.subunit'
+          merge-multiple: true
+          
+      - name: show downloaded artifact
+        run: |
+          ls -al

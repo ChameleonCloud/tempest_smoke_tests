@@ -1,27 +1,35 @@
-name: Reusable workflow example
+name: Run tempest tests
 
 on:
   workflow_call:
+    secrets:
+      accounts_gpg_passphrase:
+        required: true
+        description: "gpg passphrase to decrypt openstack credentials"
     inputs:
       config-path:
         required: true
         type: string
+        description: "path to dir containing tempest.conf and accounts.yaml.gpg"
       name:
         required: true
         type: string
-    secrets:
-      accounts_gpg_passphrase:
+      tempest_args:
         required: true
-      slack_webhook_url:
-        required: true
-    
+        type: string
+    outputs:
+      subunit_artifact_url: 
+        value: "${{ jobs.tempest_action.outputs.subunit_artifact_url }}"
+      subunit_artifact_id: 
+        value: "${{ jobs.tempest_action.outputs.subunit_artifact_id }}"
 
 jobs:
-  run_tempest:
+  tempest_action:
     name: "Tempest Tests: ${{inputs.name}}"
     runs-on: ubuntu-22.04
-    env:
-      artifact_name: "${{inputs.name}}-ctrf-report"
+    outputs:
+      subunit_artifact_url: ${{ steps.subunit_artifact.outputs.artifact-url}}
+      subunit_artifact_id: ${{ steps.subunit_artifact.outputs.artifact-id}}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -37,60 +45,24 @@ jobs:
           ./decrypt_secret.sh \
             "${{inputs.config-path}}/accounts.yaml.gpg" \
             "${{inputs.config-path}}/accounts.yaml"
-      - name: init workspace
-        run: |
-          tempest init \
-          --config-dir ${{inputs.config-path}} \
-          --name ${{inputs.name}} \
-          workspace
+      - name: init workspace from source config
+        run: tempest init --config-dir ${{inputs.config-path}} --name ${{inputs.name}} workspace
       - name: show templated config
-        run: |
-          ls -al workspace
-          ls -al workspace/etc/
-          cat workspace/etc/tempest.conf
-      - name: List Tests that will be run
-        working-directory: workspace
-        run: |
-          tempest run \
-            --include-list etc/include_list \
-            --exclude-list etc/exclude_list \
-            --list-tests
-      - name: Run Tests
+        run: cat workspace/etc/tempest.conf
+      - name: Tempest Run
         working-directory: workspace
         continue-on-error: true
+        run: tempest run ${{ inputs.tempest_args }}
+      - name: save subunit output
+        working-directory: workspace
         run: |
-          tempest run \
-            --concurrency 2 \
-            --include-list etc/include_list \
-            --exclude-list etc/exclude_list
-      - name: Generate CTRF json from stestr result
-        shell: bash
-        run: python3 src/tempest_runner/parse_results.py workspace
-      - name: Publish CTRF Test Summary Results
-        run: npx github-actions-ctrf summary --artifact-name ${{env.artifact_name}} "workspace/ctrf-results-0.json"
-        if: always()
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Publish CTRF Failures
-        run: npx github-actions-ctrf failed --artifact-name ${{env.artifact_name}} --annotate false "workspace/ctrf-results-0.json"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        if: always()
-      - name: Publish CTRF Test History
-        run: npx github-actions-ctrf historical --artifact-name ${{env.artifact_name}} --annotate false  "workspace/ctrf-results-0.json"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        if: always()
-        
-      - name: Publish failures to slack
-        run: npx slack-ctrf failed --title ${{inputs.name}} "workspace/ctrf-results-0.json"
-        env:
-          SLACK_WEBHOOK_URL: ${{secrets.slack_webhook_url}}
-        if: always()
-
-      - name: Upload test results
-        id: upload_result
+          mkdir subunit_output
+          stestr last --all-attachments --subunit > "subunit_output/${{inputs.name}}-${{github.run_id}}.subunit"
+          python3 ../src/tempest_runner/parse_results.py . \
+          && mv ctrf-results-0.json "subunit_output/${{inputs.name}}-${{github.run_id}}-ctrf.json"
+      - name: upload result artifact
+        id: subunit_artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{env.artifact_name}}
-          path: "workspace/ctrf-results-0.json"
+          path: "workspace/subunit_output"
+          name: "${{inputs.name}}.subunit"
