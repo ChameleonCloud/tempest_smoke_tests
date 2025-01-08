@@ -1,4 +1,4 @@
-name: Reusable workflow example
+name: Tempest Tests Action
 
 on:
   workflow_call:
@@ -56,6 +56,7 @@ jobs:
             --exclude-list etc/exclude_list \
             --list-tests
       - name: Run Tests
+        id: tempest_run_tests
         working-directory: workspace
         continue-on-error: true
         run: |
@@ -67,7 +68,7 @@ jobs:
         shell: bash
         run: python3 src/tempest_runner/parse_results.py workspace
       - name: Publish CTRF Test Summary Results
-        run: npx github-actions-ctrf summary --artifact-name ${{env.artifact_name}} "workspace/ctrf-results-0.json"
+        run: npx github-actions-ctrf summary --exit-on-fail --artifact-name ${{env.artifact_name}} "workspace/ctrf-results-0.json"
         if: always()
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -94,3 +95,9 @@ jobs:
         with:
           name: ${{env.artifact_name}}
           path: "workspace/ctrf-results-0.json"
+          
+      - name: Upload Tempest Logs
+        uses: actions/upload-artifact@v4
+        with:
+          name: "${{inputs.name}}-tempest.log"
+          path: "workspace/logs/tempest.log"
