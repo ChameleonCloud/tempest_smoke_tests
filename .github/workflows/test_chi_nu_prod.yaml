@@ -1,4 +1,4 @@
-name: run smoke tests for CHI@UC
+name: run smoke tests for CHI@NU
 
 on: 
   workflow_dispatch:
@@ -10,7 +10,7 @@ on:
       - reference_configs/nu_prod/
       - src
       - .github/workflows/tempest_action.yaml
-      - .github/workflows/test_chi_uc_prod.yaml
+      - .github/workflows/test_chi_nu_prod.yaml
 
 concurrency:
   group: "CHI@NU"
@@ -18,7 +18,7 @@ concurrency:
 
 jobs:
   run_tests:
-    name: "CHI@UC Smoke Tests"
+    name: "CHI@NU Smoke Tests"
     uses: ./.github/workflows/tempest_action.yaml
     with:
       config-path: reference_configs/nu_prod/
