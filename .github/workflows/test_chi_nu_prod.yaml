@@ -1,0 +1,28 @@
+name: run smoke tests for CHI@UC
+
+on: 
+  workflow_dispatch:
+  schedule:
+    - cron: "20 6 * * *"
+  push:
+    branches: main
+    paths:
+      - reference_configs/nu_prod/
+      - src
+      - .github/workflows/tempest_action.yaml
+      - .github/workflows/test_chi_uc_prod.yaml
+
+concurrency:
+  group: "CHI@NU"
+  cancel-in-progress: false
+
+jobs:
+  run_tests:
+    name: "CHI@UC Smoke Tests"
+    uses: ./.github/workflows/tempest_action.yaml
+    with:
+      config-path: reference_configs/nu_prod/
+      name: "CHI@NU"
+    secrets:
+      accounts_gpg_passphrase: ${{secrets.accounts_gpg_passphrase}}
+      slack_webhook_url: ${{secrets.slack_webhook_url}}
