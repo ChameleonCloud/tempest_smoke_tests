@@ -1,0 +1,28 @@
+name: run smoke tests for CHI@NCAR
+
+on: 
+  workflow_dispatch:
+  schedule:
+    - cron: "20 7 * * *"
+  push:
+    branches: main
+    paths:
+      - reference_configs/ncar_prod/
+      - src
+      - .github/workflows/tempest_action.yaml
+      - .github/workflows/test_chi_ncar_prod.yaml
+
+concurrency:
+  group: "CHI@NCAR"
+  cancel-in-progress: false
+
+jobs:
+  run_tests:
+    name: "CHI@NCAR Smoke Tests"
+    uses: ./.github/workflows/tempest_action.yaml
+    with:
+      config-path: reference_configs/ncar_prod/
+      name: "CHI@NCAR"
+    secrets:
+      accounts_gpg_passphrase: ${{secrets.accounts_gpg_passphrase}}
+      slack_webhook_url: ${{secrets.slack_webhook_url}}
