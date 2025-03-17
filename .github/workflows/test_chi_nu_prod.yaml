@@ -2,15 +2,6 @@ name: run smoke tests for CHI@NU
 
 on: 
   workflow_dispatch:
-  schedule:
-    - cron: "20 6 * * *"
-  push:
-    branches: main
-    paths:
-      - reference_configs/nu_prod/
-      - src
-      - .github/workflows/tempest_action.yaml
-      - .github/workflows/test_chi_nu_prod.yaml
 
 concurrency:
   group: "CHI@NU"
