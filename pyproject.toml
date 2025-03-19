@@ -12,6 +12,7 @@ dependencies = [
     "tempest",
     "pydantic",
     "manila-tempest-plugin",
+    "octavia-tempest-plugin",
     "zun-tempest-plugin",
     "blazar-tempest-plugin @ git+https://github.com/chameleoncloud/chi-blazar-tempest-plugin"
 ]
