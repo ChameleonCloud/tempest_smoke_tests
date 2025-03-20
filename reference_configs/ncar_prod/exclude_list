@@ -6,3 +6,10 @@ tempest.api.compute.servers.test_create_server.ServersTestJSON
 tempest.api.compute.servers.test_server_actions.ServerActionsTestJSON
 tempest.api.compute.servers.test_server_addresses.ServerAddressesTestJSON
 tempest.api.compute.servers.test_create_server.ServersTestManualDisk
+
+# known failing if you don't have any ad-hoc floating IPs!
+tempest.api.network.test_floating_ips.FloatingIPTestJSON
+tempest.api.network.test_networks.BulkNetworkOpsTest
+tempest.api.network.test_networks.NetworksTest
+tempest.api.network.test_ports.PortsTestJSON
+tempest.api.network.test_routers.RoutersTest
