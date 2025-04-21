@@ -64,40 +64,36 @@ jobs:
             --concurrency 2 \
             --include-list etc/include_list \
             --exclude-list etc/exclude_list
+
       - name: Generate CTRF json from stestr result
         shell: bash
         run: python3 src/tempest_runner/parse_results.py workspace
-      - name: Publish CTRF Test Summary Results
-        run: npx github-actions-ctrf summary --exit-on-fail --artifact-name ${{env.artifact_name}} "workspace/ctrf-results-0.json"
-        if: always()
+
+      - name: Publish Test Report
+        uses: ctrf-io/github-test-reporter@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Publish CTRF Failures
-        run: npx github-actions-ctrf failed --artifact-name ${{env.artifact_name}} --annotate false "workspace/ctrf-results-0.json"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          report-path: "workspace/ctrf-results-0.json"
+          summary-report: true
+          failed-report: true
+          previous-results-report: true
+          upload-artifact: true
+          artifact-name: "${{env.artifact_name}}"
         if: always()
-      - name: Publish CTRF Test History
-        run: npx github-actions-ctrf historical --artifact-name ${{env.artifact_name}} --annotate false  "workspace/ctrf-results-0.json"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload Tempest Logs
+        uses: actions/upload-artifact@v4
+        with:
+          name: "${{inputs.name}}-tempest.log"
+          path: "workspace/logs/tempest.log"
         if: always()
-        
+
       - name: Publish failures to slack
         run: npx slack-ctrf failed --title ${{inputs.name}} "workspace/ctrf-results-0.json"
         env:
           SLACK_WEBHOOK_URL: ${{secrets.slack_webhook_url}}
         if: always()
 
-      - name: Upload test results
-        id: upload_result
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{env.artifact_name}}
-          path: "workspace/ctrf-results-0.json"
+      
           
-      - name: Upload Tempest Logs
-        uses: actions/upload-artifact@v4
-        with:
-          name: "${{inputs.name}}-tempest.log"
-          path: "workspace/logs/tempest.log"
