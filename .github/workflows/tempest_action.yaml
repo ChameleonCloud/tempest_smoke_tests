@@ -80,6 +80,7 @@ jobs:
           previous-results-report: true
           upload-artifact: true
           artifact-name: "${{env.artifact_name}}"
+          exit-on-fail: true
         if: always()
 
       - name: Upload Tempest Logs
