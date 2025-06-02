@@ -9,6 +9,10 @@ on:
       name:
         required: true
         type: string
+      enable_alerts:
+        required: false
+        type: boolean
+        default: true
     secrets:
       accounts_gpg_passphrase:
         required: true
@@ -94,7 +98,4 @@ jobs:
         run: npx slack-ctrf failed --title ${{inputs.name}} "workspace/ctrf-results-0.json"
         env:
           SLACK_WEBHOOK_URL: ${{secrets.slack_webhook_url}}
-        if: always()
-
-      
-          
+        if: ${{inputs.enable_alerts}}
