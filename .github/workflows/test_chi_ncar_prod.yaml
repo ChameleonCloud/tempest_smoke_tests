@@ -23,6 +23,7 @@ jobs:
     with:
       config-path: reference_configs/ncar_prod/
       name: "CHI@NCAR"
+      enable_alerts: false
     secrets:
       accounts_gpg_passphrase: ${{secrets.accounts_gpg_passphrase}}
       slack_webhook_url: ${{secrets.slack_webhook_url}}
