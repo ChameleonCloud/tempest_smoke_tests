@@ -23,6 +23,7 @@ jobs:
     with:
       config-path: reference_configs/kvm_prod/
       name: "KVM@TACC"
+      enable_alerts: true
     secrets:
       accounts_gpg_passphrase: ${{secrets.accounts_gpg_passphrase}}
       slack_webhook_url: ${{secrets.slack_webhook_url}}
