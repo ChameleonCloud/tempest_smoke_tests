@@ -98,4 +98,4 @@ jobs:
         run: npx slack-ctrf failed --title ${{inputs.name}} "workspace/ctrf-results-0.json"
         env:
           SLACK_WEBHOOK_URL: ${{secrets.slack_webhook_url}}
-        if: ${{inputs.enable_alerts}}
+        if: ${{ !cancelled() && inputs.enable_alerts }}
