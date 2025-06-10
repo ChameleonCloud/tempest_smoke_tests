@@ -2,6 +2,8 @@ name: run smoke tests for CHI@NU
 
 on: 
   workflow_dispatch:
+  schedule:
+    - cron: "20 7 * * *"
 
 concurrency:
   group: "CHI@NU"
