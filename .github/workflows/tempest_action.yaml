@@ -16,7 +16,6 @@ on:
       regex:
         required: false
         type: string
-        default: "^(?!.*NONCRITICAL).*" # Exclude NONCRITICAL tests by default
     secrets:
       accounts_gpg_passphrase:
         required: true
@@ -72,8 +71,6 @@ jobs:
             echo "Running tests matching regex: ${{inputs.regex}}"
             tempest run \
               --concurrency 2 \
-              --include-list etc/include_list \
-              --exclude-list etc/exclude_list \
               --regex "${{inputs.regex}}"
           else
             echo "Running all tests in include_list excluding exclude_list"
