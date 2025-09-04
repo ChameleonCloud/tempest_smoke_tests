@@ -1,0 +1,30 @@
+name: run non-critical smoke tests for KVM@TACC
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "30 7 * * *"
+  push:
+    branches: main
+    paths:
+      - reference_configs/kvm_prod/
+      - src
+      - .github/workflows/tempest_action.yaml
+      - .github/workflows/test_kvm_tacc_prod_noncritical.yaml
+
+concurrency:
+  group: "KVM@TACC"
+  cancel-in-progress: false
+
+jobs:
+  run_tests:
+    name: "KVM@TACC Smoke Tests (Non-Critical)"
+    uses: ./.github/workflows/tempest_action.yaml
+    with:
+      config-path: reference_configs/kvm_prod/
+      name: "KVM@TACC"
+      enable_alerts: true
+      regex: ".*NONCRITICAL.*"
+    secrets:
+      accounts_gpg_passphrase: ${{secrets.accounts_gpg_passphrase}}
+      slack_webhook_url: ${{secrets.slack_noncritical_webhook_url}}

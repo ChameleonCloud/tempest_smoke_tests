@@ -1,0 +1,29 @@
+name: run non-critical smoke tests for CHI@TACC
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "20 7 * * *"
+  push:
+    branches: main
+    paths:
+      - reference_configs/tacc_prod/
+      - src
+      - .github/workflows/tempest_action.yaml
+      - .github/workflows/test_chi_tacc_prod_noncritical.yaml
+
+concurrency:
+  group: "CHI@TACC"
+  cancel-in-progress: false
+
+jobs:
+  run_tests:
+    name: "CHI@TACC Smoke Tests (Non-Critical)"
+    uses: ./.github/workflows/tempest_action.yaml
+    with:
+      config-path: reference_configs/tacc_prod/
+      name: "CHI@TACC"
+      regex: ".*NONCRITICAL.*"
+    secrets:
+      accounts_gpg_passphrase: ${{secrets.accounts_gpg_passphrase}}
+      slack_webhook_url: ${{secrets.slack_noncritical_webhook_url}}
