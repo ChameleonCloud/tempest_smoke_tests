@@ -1,2 +1,5 @@
 # known failing due to interaction between federated auth and our horizon config
 tempest.scenario.test_dashboard_basic_ops.TestDashboardBasicOps.test_basic_scenario
+
+# non-critical tests we don't want run by default (they run separately)
+non_critical
