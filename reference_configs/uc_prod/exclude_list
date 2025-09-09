@@ -7,5 +7,8 @@ tempest.api.compute.servers.test_server_actions.ServerActionsTestJSON
 tempest.api.compute.servers.test_server_addresses.ServerAddressesTestJSON
 tempest.api.compute.servers.test_create_server.ServersTestManualDisk
 
+# known failing due to using RGW instead of swift implementation
+tempest.api.object_storage.test_container_quotas.ContainerQuotasTest.test_upload_too_many_objects
+
 # non-critical tests we don't want run by default (they run separately)
 non_critical
