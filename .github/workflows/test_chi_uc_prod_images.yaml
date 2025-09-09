@@ -17,13 +17,25 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  run_tests:
+  critical_tests:
+    name: "CHI@UC Image Tests"
+    uses: ./.github/workflows/tempest_action.yaml
+    with:
+      config-path: reference_configs/uc_prod/
+      name: "CHI@UC"
+      enable_alerts: true
+      regex: "blazar_tempest_plugin.tests.scenario.test_images.*(?<!non)critical"
+    secrets:
+      accounts_gpg_passphrase: ${{secrets.accounts_gpg_passphrase}}
+      slack_webhook_url: ${{secrets.slack_webhook_url}}
+  noncritical_tests:
     name: "CHI@UC Smoke Tests (Non-Critical)"
     uses: ./.github/workflows/tempest_action.yaml
     with:
       config-path: reference_configs/uc_prod/
       name: "CHI@UC"
-      regex: ".*NONCRITICAL.*"
+      enable_alerts: true
+      regex: "blazar_tempest_plugin.tests.scenario.test_images.*noncritical"
     secrets:
       accounts_gpg_passphrase: ${{secrets.accounts_gpg_passphrase}}
       slack_webhook_url: ${{secrets.slack_noncritical_webhook_url}}

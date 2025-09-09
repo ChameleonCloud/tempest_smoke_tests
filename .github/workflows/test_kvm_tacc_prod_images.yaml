@@ -1,4 +1,4 @@
-name: run non-critical smoke tests for KVM@TACC
+name: run image smoke tests for KVM@TACC
 
 on:
   workflow_dispatch:
@@ -17,14 +17,25 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  run_tests:
-    name: "KVM@TACC Smoke Tests (Non-Critical)"
+  critical_tests:
+    name: "KVM@TACC Image Tests"
     uses: ./.github/workflows/tempest_action.yaml
     with:
       config-path: reference_configs/kvm_prod/
       name: "KVM@TACC"
       enable_alerts: true
-      regex: ".*NONCRITICAL.*"
+      regex: "blazar_tempest_plugin.tests.scenario.test_images.*(?<!non)critical"
+    secrets:
+      accounts_gpg_passphrase: ${{secrets.accounts_gpg_passphrase}}
+      slack_webhook_url: ${{secrets.slack_webhook_url}}
+  noncritical_tests:
+    name: "KVM@TACC Image Tests"
+    uses: ./.github/workflows/tempest_action.yaml
+    with:
+      config-path: reference_configs/kvm_prod/
+      name: "KVM@TACC"
+      enable_alerts: true
+      regex: "blazar_tempest_plugin.tests.scenario.test_images.*noncritical"
     secrets:
       accounts_gpg_passphrase: ${{secrets.accounts_gpg_passphrase}}
       slack_webhook_url: ${{secrets.slack_noncritical_webhook_url}}
