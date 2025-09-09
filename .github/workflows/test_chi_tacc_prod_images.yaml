@@ -17,13 +17,25 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  run_tests:
-    name: "CHI@TACC Smoke Tests (Non-Critical)"
+  critical_tests:
+    name: "CHI@TACC Image Tests"
     uses: ./.github/workflows/tempest_action.yaml
     with:
       config-path: reference_configs/tacc_prod/
       name: "CHI@TACC"
-      regex: ".*NONCRITICAL.*"
+      enable_alerts: true
+      regex: "blazar_tempest_plugin.tests.scenario.test_images.*(?<!non)critical"
+    secrets:
+      accounts_gpg_passphrase: ${{secrets.accounts_gpg_passphrase}}
+      slack_webhook_url: ${{secrets.slack_webhook_url}}
+  noncritical_tests:
+    name: "CHI@TACC Image Tests (Non-Critical)"
+    uses: ./.github/workflows/tempest_action.yaml
+    with:
+      config-path: reference_configs/tacc_prod/
+      name: "CHI@TACC"
+      enable_alerts: true
+      regex: "blazar_tempest_plugin.tests.scenario.test_images.*noncritical"
     secrets:
       accounts_gpg_passphrase: ${{secrets.accounts_gpg_passphrase}}
       slack_webhook_url: ${{secrets.slack_noncritical_webhook_url}}
