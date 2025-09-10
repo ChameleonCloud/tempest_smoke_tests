@@ -1,4 +1,4 @@
-name: run non-critical smoke tests for CHI@UC
+name: run image smoke tests for CHI@UC
 
 on:
   workflow_dispatch:
@@ -12,28 +12,24 @@ on:
       - .github/workflows/tempest_action.yaml
       - .github/workflows/test_chi_uc_prod_noncritical.yaml
 
-concurrency:
-  group: "CHI@UC"
-  cancel-in-progress: false
-
 jobs:
   critical_tests:
     name: "CHI@UC Image Tests"
     uses: ./.github/workflows/tempest_action.yaml
     with:
       config-path: reference_configs/uc_prod/
-      name: "CHI@UC"
+      name: "CHI@UC-image-critical"
       enable_alerts: true
       regex: "blazar_tempest_plugin.tests.scenario.test_images.*(?<!non)critical"
     secrets:
       accounts_gpg_passphrase: ${{secrets.accounts_gpg_passphrase}}
       slack_webhook_url: ${{secrets.slack_webhook_url}}
   noncritical_tests:
-    name: "CHI@UC Smoke Tests (Non-Critical)"
+    name: "CHI@UC Image Tests (Non-Critical)"
     uses: ./.github/workflows/tempest_action.yaml
     with:
       config-path: reference_configs/uc_prod/
-      name: "CHI@UC"
+      name: "CHI@UC-image-noncritical"
       enable_alerts: true
       regex: "blazar_tempest_plugin.tests.scenario.test_images.*noncritical"
     secrets:

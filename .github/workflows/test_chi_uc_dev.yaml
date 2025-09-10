@@ -3,10 +3,6 @@ name: run smoke tests for DEV@UC
 on: 
   workflow_dispatch:
 
-concurrency:
-  group: "DEV@UC"
-  cancel-in-progress: false
-
 jobs:
   run_tests:
     name: "DEV@UC Smoke Tests"

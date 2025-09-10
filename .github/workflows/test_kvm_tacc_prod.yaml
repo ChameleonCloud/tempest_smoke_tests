@@ -12,10 +12,6 @@ on:
       - .github/workflows/tempest_action.yaml
       - .github/workflows/test_kvm_tacc_prod.yaml
 
-concurrency:
-  group: "KVM@TACC"
-  cancel-in-progress: false
-
 jobs:
   run_tests:
     name: "KVM@TACC Smoke Tests"
