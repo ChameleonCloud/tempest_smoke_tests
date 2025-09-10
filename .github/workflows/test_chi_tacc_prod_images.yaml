@@ -18,7 +18,7 @@ jobs:
     uses: ./.github/workflows/tempest_action.yaml
     with:
       config-path: reference_configs/tacc_prod/
-      name: "CHI@TACC"
+      name: "CHI@TACC-image-critical"
       enable_alerts: true
       regex: "blazar_tempest_plugin.tests.scenario.test_images.*(?<!non)critical"
     secrets:
@@ -29,7 +29,7 @@ jobs:
     uses: ./.github/workflows/tempest_action.yaml
     with:
       config-path: reference_configs/tacc_prod/
-      name: "CHI@TACC"
+      name: "CHI@TACC-image-noncritical"
       enable_alerts: true
       regex: "blazar_tempest_plugin.tests.scenario.test_images.*noncritical"
     secrets:
