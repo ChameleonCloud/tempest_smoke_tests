@@ -26,7 +26,7 @@ on:
 jobs:
   run_tempest:
     concurrency:
-      group: ${{inputs.name}}
+      group: ${{inputs.config-path}}
       cancel-in-progress: false
     name: "Tempest Tests: ${{inputs.name}}"
     runs-on: ubuntu-22.04
