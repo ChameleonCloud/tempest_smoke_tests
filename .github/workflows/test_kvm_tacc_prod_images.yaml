@@ -12,10 +12,6 @@ on:
       - .github/workflows/tempest_action.yaml
       - .github/workflows/test_kvm_tacc_prod_noncritical.yaml
 
-concurrency:
-  group: "KVM@TACC"
-  cancel-in-progress: false
-
 jobs:
   critical_tests:
     name: "KVM@TACC Image Tests"
@@ -29,7 +25,7 @@ jobs:
       accounts_gpg_passphrase: ${{secrets.accounts_gpg_passphrase}}
       slack_webhook_url: ${{secrets.slack_webhook_url}}
   noncritical_tests:
-    name: "KVM@TACC Image Tests"
+    name: "KVM@TACC Image Tests (Non-Critical)"
     uses: ./.github/workflows/tempest_action.yaml
     with:
       config-path: reference_configs/kvm_prod/
