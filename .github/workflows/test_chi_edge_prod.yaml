@@ -12,10 +12,6 @@ on:
       - .github/workflows/tempest_action.yaml
       - .github/workflows/test_chi_edge_prod.yaml
 
-concurrency:
-  group: "CHI@Edge"
-  cancel-in-progress: false
-
 jobs:
   run_tests:
     name: "CHI@Edge Smoke Tests"

@@ -12,10 +12,6 @@ on:
       - .github/workflows/tempest_action.yaml
       - .github/workflows/test_chi_ncar_prod.yaml
 
-concurrency:
-  group: "CHI@NCAR"
-  cancel-in-progress: false
-
 jobs:
   run_tests:
     name: "CHI@NCAR Smoke Tests"

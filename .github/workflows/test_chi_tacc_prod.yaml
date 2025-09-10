@@ -12,10 +12,6 @@ on:
       - .github/workflows/tempest_action.yaml
       - .github/workflows/test_chi_tacc_prod.yaml
 
-concurrency:
-  group: "CHI@TACC"
-  cancel-in-progress: false
-
 jobs:
   run_tests:
     name: "CHI@TACC Smoke Tests"

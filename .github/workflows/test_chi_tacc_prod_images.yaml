@@ -1,4 +1,4 @@
-name: run non-critical smoke tests for CHI@TACC
+name: run image smoke tests for CHI@TACC
 
 on:
   workflow_dispatch:
@@ -11,10 +11,6 @@ on:
       - src
       - .github/workflows/tempest_action.yaml
       - .github/workflows/test_chi_tacc_prod_noncritical.yaml
-
-concurrency:
-  group: "CHI@TACC"
-  cancel-in-progress: false
 
 jobs:
   critical_tests:
