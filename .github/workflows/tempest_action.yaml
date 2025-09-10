@@ -58,10 +58,16 @@ jobs:
       - name: List Tests that will be run
         working-directory: workspace
         run: |
-          tempest run \
-            --include-list etc/include_list \
-            --exclude-list etc/exclude_list \
-            --list-tests
+          if [[ -n "${{inputs.regex}}" ]]; then
+            tempest run \
+              --list-tests \
+              --regex "${{inputs.regex}}"
+          else
+            tempest run \
+              --list-tests \
+              --include-list etc/include_list \
+              --exclude-list etc/exclude_list
+          fi
       - name: Run Tests
         id: tempest_run_tests
         working-directory: workspace
