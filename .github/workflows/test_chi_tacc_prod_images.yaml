@@ -13,25 +13,15 @@ on:
       - .github/workflows/test_chi_tacc_prod_noncritical.yaml
 
 jobs:
-  critical_tests:
+  image_tests:
     name: "CHI@TACC Image Tests"
     uses: ./.github/workflows/tempest_action.yaml
     with:
       config-path: reference_configs/tacc_prod/
       name: "CHI@TACC-image-critical"
       enable_alerts: true
-      regex: "blazar_tempest_plugin.tests.scenario.test_images.*(?<!non)critical"
+      regex: "blazar_tempest_plugin.tests.scenario.test_images"
     secrets:
       accounts_gpg_passphrase: ${{secrets.accounts_gpg_passphrase}}
-      slack_webhook_url: ${{secrets.slack_webhook_url}}
-  noncritical_tests:
-    name: "CHI@TACC Image Tests (Non-Critical)"
-    uses: ./.github/workflows/tempest_action.yaml
-    with:
-      config-path: reference_configs/tacc_prod/
-      name: "CHI@TACC-image-noncritical"
-      enable_alerts: true
-      regex: "blazar_tempest_plugin.tests.scenario.test_images.*noncritical"
-    secrets:
-      accounts_gpg_passphrase: ${{secrets.accounts_gpg_passphrase}}
+      # slack_webhook_url: ${{secrets.slack_webhook_url}}
       slack_webhook_url: ${{secrets.slack_noncritical_webhook_url}}
