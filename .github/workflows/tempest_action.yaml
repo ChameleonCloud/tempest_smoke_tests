@@ -47,10 +47,14 @@ jobs:
           ./decrypt_secret.sh \
             "${{inputs.config-path}}/accounts.yaml.gpg" \
             "${{inputs.config-path}}/accounts.yaml"
+      - name: delete any conflicting workspace folder
+        run: |
+          rm -rf workspace && mkdir workspace
       - name: init workspace
         run: |
           tempest init \
           --config-dir ${{inputs.config-path}} \
+          --workspace-path workspace/workspace.yaml \
           --name ${{inputs.name}} \
           workspace
       - name: show templated config
