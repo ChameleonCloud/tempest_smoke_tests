@@ -29,7 +29,7 @@ jobs:
       group: ${{inputs.config-path}}
       cancel-in-progress: false
     name: "Tempest Tests: ${{inputs.name}}"
-    runs-on: ubuntu-22.04
+    runs-on: [self-hosted, ubuntu-24.04]
     env:
       artifact_name: "${{inputs.name}}-ctrf-report"
     steps:
@@ -47,10 +47,14 @@ jobs:
           ./decrypt_secret.sh \
             "${{inputs.config-path}}/accounts.yaml.gpg" \
             "${{inputs.config-path}}/accounts.yaml"
+      - name: delete any conflicting workspace folder
+        run: |
+          rm -rf workspace && mkdir workspace
       - name: init workspace
         run: |
           tempest init \
           --config-dir ${{inputs.config-path}} \
+          --workspace-path workspace/workspace.yaml \
           --name ${{inputs.name}} \
           workspace
       - name: show templated config
