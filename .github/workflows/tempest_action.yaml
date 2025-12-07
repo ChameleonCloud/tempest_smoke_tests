@@ -38,7 +38,7 @@ jobs:
         with:
           python-version: '3.13'
           cache: 'pip'
-      - name: Run Smoke Tests
+      - name: execute smoke tests script
         id: tempest_run_tests
         continue-on-error: true
         env:
