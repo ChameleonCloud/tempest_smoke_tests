@@ -38,60 +38,19 @@ jobs:
         with:
           python-version: '3.13'
           cache: 'pip'
-      - name: install tempest
-        run: pip install .
-      - name: decrypt_accounts_file
+      - name: Run Smoke Tests
+        id: tempest_run_tests
+        continue-on-error: true
         env:
           SECRET_PASSPHRASE: ${{secrets.accounts_gpg_passphrase}}
         run: |
-          ./decrypt_secret.sh \
-            "${{inputs.config-path}}/accounts.yaml.gpg" \
-            "${{inputs.config-path}}/accounts.yaml"
-      - name: init workspace
-        run: |
-          tempest init \
-          --config-dir ${{inputs.config-path}} \
-          --name ${{inputs.name}} \
-          workspace
-      - name: show templated config
-        run: |
-          ls -al workspace
-          ls -al workspace/etc/
-          cat workspace/etc/tempest.conf
-      - name: List Tests that will be run
-        working-directory: workspace
-        run: |
+          chmod +x run_smoke_tests.sh
+          ARGS=(--config-path "${{inputs.config-path}}" --name "${{inputs.name}}" --accounts-passphrase "$SECRET_PASSPHRASE")
           if [[ -n "${{inputs.regex}}" ]]; then
-            tempest run \
-              --list-tests \
-              --regex "${{inputs.regex}}"
-          else
-            tempest run \
-              --list-tests \
-              --include-list etc/include_list \
-              --exclude-list etc/exclude_list
+            ARGS+=(--regex "${{inputs.regex}}")
           fi
-      - name: Run Tests
-        id: tempest_run_tests
-        working-directory: workspace
-        continue-on-error: true
-        run: |
-          if [[ -n "${{inputs.regex}}" ]]; then
-            echo "Running tests matching regex: ${{inputs.regex}}"
-            tempest run \
-              --concurrency 2 \
-              --regex "${{inputs.regex}}"
-          else
-            echo "Running all tests in include_list excluding exclude_list"
-            tempest run \
-              --concurrency 2 \
-              --include-list etc/include_list \
-              --exclude-list etc/exclude_list
-          fi
+          ./run_smoke_tests.sh "${ARGS[@]}"
 
-      - name: Generate CTRF json from stestr result
-        shell: bash
-        run: python3 src/tempest_runner/parse_results.py workspace
 
       - name: Publish Test Report
         uses: ctrf-io/github-test-reporter@v1

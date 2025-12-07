@@ -1,0 +1,63 @@
+name: Smoke Tests
+
+on:
+  schedule:
+    - cron: "20 7 * * *"
+  workflow_dispatch:
+    inputs:
+      site:
+        description: "Site to run tests against (or 'ALL' for nightly set)"
+        required: true
+        default: "ALL"
+        type: string
+      regex:
+        description: "Optional regex to filter tests (overrides matrix regex)"
+        required: false
+        type: string
+
+jobs:
+  prepare-matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Read and Filter Matrix
+        id: set-matrix
+        run: |
+          # Read the full matrix
+          MATRIX=$(cat test_matrix.json)
+          
+          # Determine filter logic
+          if [[ "${{ github.event_name }}" == "schedule" ]]; then
+            # Nightly schedule: run all marked run_nightly=true
+            FILTERed=$(echo "$MATRIX" | jq -c 'map(select(.run_nightly == true))')
+          elif [[ "${{ inputs.site }}" == "ALL" ]]; then
+             # Manual ALL: run all marked run_nightly=true (simulate nightly)
+             FILTERed=$(echo "$MATRIX" | jq -c 'map(select(.run_nightly == true))')
+          else
+             # Manual Single: run specific site
+             SITE="${{ inputs.site }}"
+             FILTERed=$(echo "$MATRIX" | jq -c --arg site "$SITE" 'map(select(.name == $site))')
+          fi
+          
+          echo "matrix=$FILTERed" >> $GITHUB_OUTPUT
+
+  run-tests:
+    needs: prepare-matrix
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJson(needs.prepare-matrix.outputs.matrix) }}
+    
+    name: "${{ matrix.name }}"
+    uses: ./.github/workflows/tempest_action.yaml
+    with:
+      config-path: ${{ matrix.config_path }}
+      name: ${{ matrix.name }}
+      # If manual regex is provided, use it. Otherwise use matrix regex.
+      regex: ${{ inputs.regex || matrix.regex }}
+      enable_alerts: true
+    secrets:
+      accounts_gpg_passphrase: ${{ secrets.accounts_gpg_passphrase }}
+      slack_webhook_url: ${{ secrets[matrix.slack_secret] }}
