@@ -7,14 +7,14 @@ name = "tempest-smoke-tests"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.13"
 dependencies = [
     "tempest",
     "pydantic",
     "manila-tempest-plugin",
     "zun-tempest-plugin",
     "blazar-tempest-plugin @ git+https://github.com/chameleoncloud/chi-blazar-tempest-plugin",
-    "urllib3 < 2.6.0"
+    "urllib3 ~= 2.5.0"
 ]
 
 [project.optional-dependencies]
