@@ -13,7 +13,8 @@ dependencies = [
     "pydantic",
     "manila-tempest-plugin",
     "zun-tempest-plugin",
-    "blazar-tempest-plugin @ git+https://github.com/chameleoncloud/chi-blazar-tempest-plugin"
+    "blazar-tempest-plugin @ git+https://github.com/chameleoncloud/chi-blazar-tempest-plugin",
+    "urllib3 < 2.6.0"
 ]
 
 [project.optional-dependencies]
