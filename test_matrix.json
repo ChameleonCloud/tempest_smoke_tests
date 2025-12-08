@@ -1,0 +1,72 @@
+[
+  {
+    "name": "CHI@Edge",
+    "config_path": "reference_configs/edge_prod/",
+    "slack_secret": "slack_webhook_url",
+    "regex": "",
+    "run_nightly": true
+  },
+  {
+    "name": "CHI@UC",
+    "config_path": "reference_configs/uc_prod/",
+    "slack_secret": "slack_webhook_url",
+    "regex": "",
+    "run_nightly": true
+  },
+  {
+    "name": "CHI@TACC",
+    "config_path": "reference_configs/tacc_prod/",
+    "slack_secret": "slack_webhook_url",
+    "regex": "",
+    "run_nightly": true
+  },
+  {
+    "name": "CHI@NU",
+    "config_path": "reference_configs/nu_prod/",
+    "slack_secret": "slack_webhook_url",
+    "regex": "",
+    "run_nightly": true
+  },
+  {
+    "name": "CHI@NCAR",
+    "config_path": "reference_configs/ncar_prod/",
+    "slack_secret": "slack_webhook_url",
+    "regex": "",
+    "run_nightly": true
+  },
+  {
+    "name": "KVM@TACC",
+    "config_path": "reference_configs/kvm_prod/",
+    "slack_secret": "slack_webhook_url",
+    "regex": "",
+    "run_nightly": true
+  },
+  {
+    "name": "CHI@TACC Image Tests",
+    "config_path": "reference_configs/tacc_prod/",
+    "slack_secret": "slack_noncritical_webhook_url",
+    "regex": "blazar_tempest_plugin.tests.scenario.test_images",
+    "run_nightly": true
+  },
+  {
+    "name": "CHI@UC Image Tests",
+    "config_path": "reference_configs/uc_prod/",
+    "slack_secret": "slack_noncritical_webhook_url",
+    "regex": "blazar_tempest_plugin.tests.scenario.test_images",
+    "run_nightly": true
+  },
+  {
+    "name": "KVM@TACC Image Tests",
+    "config_path": "reference_configs/kvm_prod/",
+    "slack_secret": "slack_noncritical_webhook_url",
+    "regex": "blazar_tempest_plugin.tests.scenario.test_images",
+    "run_nightly": true
+  },
+  {
+    "name": "DEV@UC",
+    "config_path": "reference_configs/uc_dev/",
+    "slack_secret": "slack_webhook_url",
+    "regex": "",
+    "run_nightly": false
+  }
+]
