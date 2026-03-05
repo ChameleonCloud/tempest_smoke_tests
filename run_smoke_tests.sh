@@ -42,9 +42,9 @@ echo "  Dry Run: $DRY_RUN"
 echo "Decrypting accounts file..."
 export SECRET_PASSPHRASE="$ACCOUNTS_PASSPHRASE"
 if [ "$DRY_RUN" = false ]; then
-    ./decrypt_secret.sh "$CONFIG_PATH/accounts.yaml.gpg" "$CONFIG_PATH/accounts.yaml"
+    ./crypt_secret.sh decrypt "$CONFIG_PATH/accounts.yaml.gpg" "$CONFIG_PATH/accounts.yaml"
 else
-    echo "[Dry Run] Would run: ./decrypt_secret.sh $CONFIG_PATH/accounts.yaml.gpg $CONFIG_PATH/accounts.yaml"
+    echo "[Dry Run] Would run: ./crypt_secret.sh decrypt $CONFIG_PATH/accounts.yaml.gpg $CONFIG_PATH/accounts.yaml"
 fi
 
 # 3. Initialize workspace

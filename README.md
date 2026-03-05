@@ -62,3 +62,14 @@ The structure should be:
 
 As of tempest 46.1.0, we must set `project_name` instead of `tenant_name`, and
 make sure `reader` and `member` roles are both included.
+
+## Updating the secret for a site
+
+To update `accounts.yaml` for a site, edit the plaintext file and re-encrypt it:
+
+```sh
+export SECRET_PASSPHRASE="<the passphrase>"
+./crypt_secret.sh encrypt path/to/accounts.yaml path/to/accounts.yaml.gpg
+```
+
+Then commit the updated `accounts.yaml.gpg`. Never commit the plaintext `accounts.yaml`.
