@@ -26,3 +26,39 @@ when we want to run tempest tests, we'll do the following
 2. copy the provided accounts.yaml and tempest.conf files into the workspace (with minimal templating so that the corect paths are populated in tempest conf)
 3. copy include_list and exclude_list into the workspace
 4. 
+
+# accounts.yaml reauirements
+
+Each site needs an `accounts.yaml.gpg` file, encrypted from a source `accounts.yaml` file.
+
+The structure should be:
+```yaml
+---
+- username: 'testuser-01'
+  project_name: 'testing-01'
+  password: password
+  roles:
+    - 'member'
+    - 'reader'
+- username: 'testuser-02'
+  project_name: 'testing-02'
+  password: password
+  roles:
+    - 'member'
+    - 'reader'
+- username: 'testuser-03'
+  project_name: 'testing-03'
+  password: password
+  roles:
+    - 'member'
+    - 'reader'
+- username: 'testuser-04'
+  project_name: 'testing-04'
+  password: password
+  roles:
+    - 'member'
+    - 'reader'
+```
+
+As of tempest 46.1.0, we must set `project_name` instead of `tenant_name`, and
+make sure `reader` and `member` roles are both included.
