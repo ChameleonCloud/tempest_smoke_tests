@@ -1,6 +1,6 @@
 FROM python:3.13-slim-bookworm
 
-# git is needed for the blazar-tempest-plugin VCS dependency in pyproject.toml.
+# Need git and certs to install blazar-tempest-plugin from git source
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         git \
@@ -13,8 +13,21 @@ COPY src/ /src/src/
 
 RUN pip install --no-cache-dir /src
 
-RUN mkdir -p /workspace && chown 1000:1000 /workspace
-WORKDIR /workspace
-USER 1000
+# Tempest complains if run without a homedir
+RUN useradd \
+    --home-dir /home/tempest \
+    --create-home \
+    --shell /usr/sbin/nologin \
+    --user-group \
+    tempest
+    
+# initialize the workdir with a stestr repo
+RUN mkdir /var/lib/tempest \
+    && chown tempest:tempest /var/lib/tempest
+
+WORKDIR /var/lib/tempest
+USER tempest
+RUN stestr init
+VOLUME /var/lib/tempest
 
 CMD ["tempest", "--help"]
