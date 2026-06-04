@@ -12,21 +12,11 @@ COPY pyproject.toml README.md /src/
 COPY src/ /src/src/
 
 RUN pip install --no-cache-dir /src
-
-# Tempest complains if run without a homedir
-RUN useradd \
-    --home-dir /home/tempest \
-    --create-home \
-    --shell /usr/sbin/nologin \
-    --user-group \
-    tempest
     
 # initialize the workdir with a stestr repo
-RUN mkdir /var/lib/tempest \
-    && chown tempest:tempest /var/lib/tempest
+RUN mkdir /var/lib/tempest
 
 WORKDIR /var/lib/tempest
-USER tempest
 RUN stestr init
 VOLUME /var/lib/tempest
 
