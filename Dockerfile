@@ -13,11 +13,14 @@ COPY src/ /src/src/
 
 RUN pip install --no-cache-dir /src
     
-# initialize the workdir with a stestr repo
-RUN mkdir /var/lib/tempest
+# initialize the workdir
+WORKDIR /workdir
+RUN tempest init \
+    && mkdir /var/lib/tempest \
+    && cp -a /workdir/.stestr /var/lib/tempest/ \
+    && cp /workdir/.stestr.conf /var/lib/tempest/ \
+    && rm -rf /workdir
 
 WORKDIR /var/lib/tempest
-RUN stestr init
 VOLUME /var/lib/tempest
-
-CMD ["tempest", "--help"]
+CMD ["tempest","--help"]
